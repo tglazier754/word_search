@@ -1,8 +1,18 @@
 "use client";
 import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
+import { generateWordGrid } from '@/utils/grid_generation/shared';
+
+const wordBank = ["test", "hershey", "string", "murphey", "gorillas", "metallica"]
 
 export default function Home() {
+
+    const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
+
+    generatedWordSearchGrid.then((value) => {
+        console.log(value);
+    }).catch((error) => { console.log(error); });
+
     return (
         <div className={styles.container}>
             <Head>
