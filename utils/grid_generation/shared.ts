@@ -5,6 +5,8 @@ type WeightedWord = {
     gridBeforePlacement?: string[][];
 }
 
+const characters = "abcdefghijklmnopqrstuvwxyz";
+
 export const generateWordGrid = (wordList: string[], rows: number = 10, columns: number = 10): Promise<string[][]> => {
 
     const letterMap: Map<string, number> = getStringArrayFrequencyDistribution(wordList);
@@ -32,6 +34,7 @@ function createWordSearch(wordList: WeightedWord[], rows: number = 10, columns: 
     let grid: string[][] = new Array(rows).fill(" ").map(() => new Array(columns).fill(" "));
     let index = 0;
     let unsolvable = false;
+
     while (index < wordList.length && !unsolvable) {
         const currentWord = wordList[index];
         if (!currentWord.availableSlots) {
@@ -46,9 +49,8 @@ function createWordSearch(wordList: WeightedWord[], rows: number = 10, columns: 
         const position = tempPositions[selectedPosition];
         tempPositions.splice(selectedPosition, 1);
         currentWord.availableSlots = tempPositions;
-
         if (position) {
-            const updatedGrid = placeWord(grid, currentWord.value, position?.row, position?.column, position?.direction);
+            placeWord(grid, currentWord.value, position?.row, position?.column, position?.direction);
             index += 1;
         }
         else {
@@ -71,15 +73,26 @@ function createWordSearch(wordList: WeightedWord[], rows: number = 10, columns: 
     }
     else {
         //fill in the rest with random letters
+        replaceSpacesWithLetters(grid);
         return { grid, status: 'success' }
     }
 
 }
 
+function replaceSpacesWithLetters(grid: string[][]) {
+    for (var row = 0; row < grid.length; row++) {
+        for (var col = 0; col < grid[row].length; col++) {
+            if (grid[row][col] === ' ') {
+                grid[row][col] = characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+        }
+    }
+}
+
 
 function generateWordSlots(grid: string[][], word: string): { row: number, column: number, direction: number }[] {
     const slots: { row: number, column: number, direction: number }[] = [];
-    let directions = [0, 1, 2, 3];
+    let directions = [0, 1, 2, 3, 4, 5, 6, 7];
     for (var row = 0; row < grid.length; row++) {
         for (var col = 0; col < grid[row].length; col++) {
             if (grid[row][col] === ' ' || word.indexOf(grid[row][col]) !== -1) {
@@ -100,8 +113,6 @@ function generateWordSlots(grid: string[][], word: string): { row: number, colum
 function placeWord(grid: string[][], word: string, row: number, column: number, direction: number): string[][] {
     let letterRow = row;
     let letterCol = column;
-
-    console.log(grid);
 
     for (var i = 0; i < word.length; i++) {
         grid[letterRow][letterCol] = word.charAt(i);
@@ -124,9 +135,15 @@ function checkIfWordInBounds(grid: string[][], word: string, row: number, column
     //6 = SE
     //7 = NE
     const width = grid[0].length;
-    if ((direction === 0 && column < word.length - 1) || (direction === 1 && column + word.length > grid.length - 1) ||
-        (direction === 2 && row < word.length - 1) || (direction === 3 && row + word.length > width - 1))) {
-        console.log("Not in bounds");
+    if ((direction === 0 && row < word.length - 1) ||
+        (direction === 1 && row + word.length > grid.length - 1) ||
+        (direction === 2 && column + word.length > width - 1) ||
+        (direction === 3 && column < word.length - 1) ||
+        (direction === 4 && (row < word.length - 1 || column < word.length - 1)) ||
+        (direction === 5 && (row + word.length > grid.length - 1 || column < word.length - 1)) ||
+        (direction === 6 && (row + word.length > grid.length - 1 || column + word.length > width - 1)) ||
+        (direction === 7 && (row < word.length - 1 || column + word.length > width - 1))
+    ) {
         return false;
     }
     else {
@@ -152,7 +169,7 @@ function checkIfWordInterferes(grid: string[][], word: string, row: number, colu
             let interferes = false;
             while (!interferes && counter < wordAsArray.length) {
                 const gridValue = grid[pointer.row][pointer.column];
-                if (gridValue !== ' ') {
+                if (!(gridValue === ' ' || gridValue === wordAsArray[counter])) {
                     interferes = true;
                 }
                 pointer = increasePointerInDirection(pointer.row, pointer.column, direction);
@@ -177,13 +194,13 @@ function increasePointerInDirection(row: number, column: number, direction: numb
     //7 = NE
     switch (direction) {
         case 0:
-            return { row: row, column: column - 1 };
-        case 1:
-            return { row: row, column: column + 1 };
-        case 2:
             return { row: row - 1, column: column };
-        case 3:
+        case 1:
             return { row: row + 1, column: column };
+        case 2:
+            return { row: row, column: column + 1 };
+        case 3:
+            return { row: row, column: column - 1 };
         case 4:
             return { row: row - 1, column: column - 1 };
         case 5:

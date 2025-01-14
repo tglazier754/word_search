@@ -2,16 +2,23 @@
 import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
 import { generateWordGrid } from '@/utils/grid_generation/shared';
+import { useEffect, useState } from 'react';
 
-const wordBank = ["test", "hershey", "string", "murphey", "gorillas", "metallica"]
+const wordBank = ["test", "hershey", "string", "murphy", "gorillas", "metallica"]
 
 export default function Home() {
 
-    const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
 
-    generatedWordSearchGrid.then((value) => {
-        console.log(value);
-    }).catch((error) => { console.log(error); });
+    const [searchGrid, setSearchGrid] = useState<string[][]>([]);
+
+
+    useEffect(() => {
+        const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
+        generatedWordSearchGrid.then((value) => {
+            setSearchGrid(value);
+        }).catch((error) => { console.log(error); });
+    }, []);
+
 
     return (
         <div className={styles.container}>
@@ -24,6 +31,16 @@ export default function Home() {
                 <h1 className={styles.title}>
                     Word Search
                 </h1>
+
+                <div>
+                    {searchGrid && searchGrid.length > 0 ? searchGrid.map((row, rowIndex) => {
+                        return <div key={`row${rowIndex}`} className='row'>
+                            {row.map((col, colIndex) => { return <span key={`col${colIndex}`}> {col}</span> })}
+                        </div>
+                    })
+                        : null
+                    }
+                </div>
 
 
             </main>
