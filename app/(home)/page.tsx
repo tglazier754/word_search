@@ -3,19 +3,22 @@ import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
 import { generateWordGrid } from '@/utils/grid_generation/shared';
 import { useEffect, useState } from 'react';
+import Board from '@/components/grid/board';
 
 const wordBank = ["test", "hershey", "string", "murphy", "gorillas", "metallica"]
 
 export default function Home() {
 
 
-    const [searchGrid, setSearchGrid] = useState<string[][]>([]);
+    const [searchGrid, setSearchGrid] = useState<string>("");
 
 
     useEffect(() => {
         const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
         generatedWordSearchGrid.then((value) => {
-            setSearchGrid(value);
+            let fullArray: string[] = [];
+            value.forEach((arr) => { fullArray = fullArray.concat(arr) });
+            setSearchGrid(fullArray.join(""));
         }).catch((error) => { console.log(error); });
     }, []);
 
@@ -33,13 +36,7 @@ export default function Home() {
                 </h1>
 
                 <div>
-                    {searchGrid && searchGrid.length > 0 ? searchGrid.map((row, rowIndex) => {
-                        return <div key={`row${rowIndex}`} className='row'>
-                            {row.map((col, colIndex) => { return <span key={`col${colIndex}`}> {col}</span> })}
-                        </div>
-                    })
-                        : null
-                    }
+                    <Board size={10} wordSearchCharacters={searchGrid} />
                 </div>
 
 
