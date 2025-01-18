@@ -16,11 +16,12 @@ export const Board = (props: BoardProps) => {
 
             {
                 wordSearchCharacters.split("").map((char, index) => {
-                    const row = index % size;
-                    const column = Math.floor(index / size)
+
+                    const row = Math.floor(index / size)
+                    const column = index % size;
                     return (
                         <div key={`square-${row}-${column}`}>
-                            <GridSquare letter={char} row={row} column={column} />
+                            <GridSquare letter={char} row={row} column={column} state={0} />
                         </div>)
                 })
             }

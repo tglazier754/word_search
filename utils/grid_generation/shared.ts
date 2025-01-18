@@ -155,16 +155,12 @@ function checkIfWordInBounds(grid: string[][], word: string, row: number, column
 //assume the word does not go out of bounds, should have been checked already
 //assume the starting point has been verified and that the space doesn't need to be checked
 function checkIfWordInterferes(grid: string[][], word: string, row: number, column: number, direction: number) {
-
     const isInBounds = checkIfWordInBounds(grid, word, row, column, direction);
     if (isInBounds) {
         const wordAsArray: string[] = word.split("");
-        //console.log(direction);
         if (wordAsArray && grid) {
 
             let pointer = { row, column };
-            //console.log(pointer);
-            //console.log(grid[pointer.row][pointer.column]);
             let counter = 0;
             let interferes = false;
             while (!interferes && counter < wordAsArray.length) {
@@ -173,7 +169,6 @@ function checkIfWordInterferes(grid: string[][], word: string, row: number, colu
                     interferes = true;
                 }
                 pointer = increasePointerInDirection(pointer.row, pointer.column, direction);
-                //console.log(pointer);
                 counter++;
             }
             return interferes;
@@ -183,7 +178,7 @@ function checkIfWordInterferes(grid: string[][], word: string, row: number, colu
     else return true;
 }
 
-function increasePointerInDirection(row: number, column: number, direction: number) {
+export function increasePointerInDirection(row: number, column: number, direction: number) {
     //0 = N
     //1 = S
     //2 = E
@@ -260,4 +255,102 @@ function shuffle(array: any[]) {
         [array[currentIndex], array[randomIndex]] = [
             array[randomIndex], array[currentIndex]];
     }
+}
+
+//-1 means that the path is invalid
+export function determinePathDirection(startPoint: { row: number, column: number }, endPoint: { row: number, column: number }) {
+    //a word cannot be selected backwards, the path will only work in one direction
+    //check for slope
+
+    //slope = (y2-y1) / (x2-x1)
+    const columnCalc = endPoint.column - startPoint.column;
+    const rowCalc = endPoint.row - startPoint.row;
+    const slope = rowCalc === 0 ? 0 : columnCalc / rowCalc; //rowCalc being 0 is a divide by 0 error, so return 0 instead
+
+    //These selections don't make a path
+    console.log(columnCalc);
+    console.log(rowCalc);
+    console.log(slope);
+
+    let val = -1;
+
+    //0 = N
+    //1 = S
+    //2 = E
+    //3 = W
+    //4 = NW
+    //5 = SW
+    //6 = SE
+    //7 = NE
+
+    if (Math.abs(slope) === 1) {
+        //this is a 45 degree path
+        if (columnCalc > 0 && rowCalc > 0) {
+            //SE
+            val = 6;
+        }
+        if (columnCalc > 0 && rowCalc < 0) {
+            //NE
+            val = 7;
+        }
+        if (columnCalc < 0 && rowCalc > 0) {
+            //SW
+            val = 5;
+        }
+        if (columnCalc < 0 && rowCalc < 0) {
+            //NW
+            val = 4;
+        }
+    }
+    if (slope === 0) {
+        //this is a straight path
+        if (columnCalc > 0) {
+            //E
+            val = 2;
+        }
+        if (rowCalc > 0) {
+            //S
+            val = 1;
+        }
+        if (columnCalc < 0) {
+            //W
+            val = 3;
+        }
+        if (rowCalc < 0) {
+            //N
+            val = 0;
+        }
+    }
+
+    console.log(val);
+    return val;
+
+}
+
+
+export function getWordFromPoints(grid: string[][], startPoint: { row: number, column: number }, endPoint: { row: number, column: number }): string | null {
+
+    const dir = determinePathDirection(startPoint, endPoint);
+
+    if (dir === -1) return null;
+
+    const wordArr: string[] = [];
+    let complete: boolean = false;
+    let point: { row: number, column: number } = { ...startPoint };
+
+    while (!complete) {
+        console.log(grid[point.row][point.column]);
+        wordArr.push(grid[point.row][point.column]);
+
+        if (point.row === endPoint.row && point.column === endPoint.column) {
+            complete = true;
+        }
+        else {
+            point = increasePointerInDirection(point.row, point.column, dir);
+        }
+
+    }
+
+    return wordArr.join("");
+
 }

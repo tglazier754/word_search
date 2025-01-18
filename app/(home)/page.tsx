@@ -1,25 +1,64 @@
 "use client";
 import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
-import { generateWordGrid } from '@/utils/grid_generation/shared';
-import { useEffect, useState } from 'react';
+import { generateWordGrid, getWordFromPoints } from '@/utils/grid_generation/shared';
+import { useEffect, useRef, useState } from 'react';
 import Board from '@/components/grid/board';
 
 const wordBank = ["test", "hershey", "string", "murphy", "gorillas", "metallica"]
 
 export default function Home() {
 
+    let searchGrid: string[][] = [];
+    const [searchGridString, setSearchGridString] = useState<string>("");
+    const isInitialPoint = useRef<boolean>(true);//to alternate start/end of selected word
+    const firstSelection = useRef<{ row: number, column: number } | null>(null);
+    const secondSelection = useRef<{ row: number, column: number } | null>(null);
 
-    const [searchGrid, setSearchGrid] = useState<string>("");
+    //const myElement = document.getElementById('my-element');
+
 
 
     useEffect(() => {
         const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
         generatedWordSearchGrid.then((value) => {
+            searchGrid = value;
+            console.log(value);
             let fullArray: string[] = [];
             value.forEach((arr) => { fullArray = fullArray.concat(arr) });
-            setSearchGrid(fullArray.join(""));
+            setSearchGridString(fullArray.join(""));
         }).catch((error) => { console.log(error); });
+
+        const clickHandler = (e: CustomEventInit<{ row: number, column: number }>) => {
+            if (e.detail) {
+                if (isInitialPoint.current) {
+                    firstSelection.current = e.detail;
+                }
+                else {
+                    secondSelection.current = e.detail;
+                }
+                isInitialPoint.current = !isInitialPoint.current;
+            }
+
+            console.log(firstSelection.current);
+            console.log(secondSelection.current);
+            if (firstSelection.current && secondSelection.current) {
+                //determine if the path made is valid
+                const selectedWord = getWordFromPoints(searchGrid, firstSelection.current, secondSelection.current);
+                console.log(selectedWord);
+
+                firstSelection.current = null;
+                secondSelection.current = null;
+            }
+
+
+        }
+
+        document.addEventListener('grid-click', clickHandler);
+
+        return () => {
+            document.removeEventListener('grid-click', clickHandler);
+        }
     }, []);
 
 
@@ -36,7 +75,7 @@ export default function Home() {
                 </h1>
 
                 <div>
-                    <Board size={10} wordSearchCharacters={searchGrid} />
+                    <Board size={10} wordSearchCharacters={searchGridString} />
                 </div>
 
 
