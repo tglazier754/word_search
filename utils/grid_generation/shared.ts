@@ -5,6 +5,11 @@ type WeightedWord = {
     gridBeforePlacement?: string[][];
 }
 
+export type Position = {
+    row: number;
+    column: number;
+}
+
 const characters = "abcdefghijklmnopqrstuvwxyz";
 
 export const generateWordGrid = (wordList: string[], rows: number = 10, columns: number = 10): Promise<string[][]> => {
@@ -267,11 +272,6 @@ export function determinePathDirection(startPoint: { row: number, column: number
     const rowCalc = endPoint.row - startPoint.row;
     const slope = rowCalc === 0 ? 0 : columnCalc / rowCalc; //rowCalc being 0 is a divide by 0 error, so return 0 instead
 
-    //These selections don't make a path
-    console.log(columnCalc);
-    console.log(rowCalc);
-    console.log(slope);
-
     let val = -1;
 
     //0 = N
@@ -321,8 +321,6 @@ export function determinePathDirection(startPoint: { row: number, column: number
             val = 0;
         }
     }
-
-    console.log(val);
     return val;
 
 }
@@ -353,4 +351,25 @@ export function getWordFromPoints(grid: string[][], startPoint: { row: number, c
 
     return wordArr.join("");
 
+}
+
+export function getPositionsFromPoints(startPoint: { row: number, column: number }, endPoint: { row: number, column: number }): Position[] {
+    const pointsArray = [];
+    const dir = determinePathDirection(startPoint, endPoint);
+    let complete = false;
+    let point: { row: number, column: number } = { ...startPoint };
+    while (!complete && dir !== -1) {
+
+        pointsArray.push(point);
+
+        if (point.row === endPoint.row && point.column === endPoint.column) {
+            complete = true;
+        }
+        else {
+            point = increasePointerInDirection(point.row, point.column, dir);
+        }
+
+    }
+
+    return pointsArray;
 }
