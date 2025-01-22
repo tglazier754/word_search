@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import GridSquare from "./gridSquare";
 import { getPositionsFromPoints, getWordFromPoints, Position } from "@/utils/grid_generation/shared";
 import { useMap } from "@/hooks/useMap";
 
 type BoardProps = {
     size: number;
-    wordBank: string[];
     wordSearchGrid: string[][];
+    wordBank: Map<string, WordLocation | null>;
+    wordFoundAction: (word: string, location: WordLocation) => void;
 }
 
 
@@ -21,51 +22,44 @@ type FoundWord = WordLocation & {
 
 export const Board = (props: BoardProps) => {
 
-    const { size, wordSearchGrid, wordBank } = props;
-    const width = size * 30;
+    const { size, wordSearchGrid, wordBank, wordFoundAction } = props;
 
-    const isInitialPoint = useRef<boolean>(true);//to alternate start/end of selected word
-    const firstSelection = useRef<{ row: number, column: number } | null>(null);
-    const secondSelection = useRef<{ row: number, column: number } | null>(null);
-    const [wordBankMap, wordBankActions] = useMap<string, WordLocation | null>(wordBank.map((word) => { return [word, null] }));
-    //const [selectedWordPositions, setSelectedWordPositions] = useState<Position[]>([]);
+    let isInitialPoint = true;//to alternate start/end of selected word
+    let firstSelection: Position | null = null;
+    let secondSelection: Position | null = null;
     //string key is of shape "row-column"
     const [selectedWordPositionsMap, selectedWordPositionsMapActions] = useMap<string, boolean>();
 
-    const clickHandler = (row: number, column: number) => {
-        if (isInitialPoint.current) {
-            firstSelection.current = { row, column };
+    const gridSquareClickHandler = (row: number, column: number) => {
+        if (isInitialPoint) {
+            firstSelection = { row, column };
         }
         else {
-            secondSelection.current = { row, column };
+            secondSelection = { row, column };
         }
-        isInitialPoint.current = !isInitialPoint.current;
-        if (firstSelection.current && secondSelection.current) {
-            //determine if the path made is valid
-            const selectedWord = getWordFromPoints(wordSearchGrid, firstSelection.current, secondSelection.current);
-            if (selectedWord && wordBank.lastIndexOf(selectedWord) !== -1) {
-                wordBankActions.set(selectedWord, { startPos: firstSelection.current, endPos: secondSelection.current });
-                const positions = getPositionsFromPoints(firstSelection.current, secondSelection.current);
+        isInitialPoint = !isInitialPoint;
+        if (firstSelection && secondSelection) {
+            const selectedWord = getWordFromPoints(wordSearchGrid, firstSelection, secondSelection);
+            if (selectedWord && wordBank.has(selectedWord)) {
+                wordFoundAction(selectedWord, { startPos: firstSelection, endPos: secondSelection });
+                const positions = getPositionsFromPoints(firstSelection, secondSelection);
                 positions.forEach((position) => {
                     selectedWordPositionsMapActions.set(`${position.row}-${position.column}`, true);
                 });
-
             }
-            firstSelection.current = null;
-            secondSelection.current = null;
+
         }
     }
 
     return (
-        <div className={`flex flex-wrap`} style={{ width: `${width}px` }}>
+        <div className={`gap-2`} style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)` }}>
             {
                 wordSearchGrid.map((row, rowIndex) => {
                     return row.map((letter, columnIndex) => {
-                        //const col = rowIndex > 0 ? rowIndex * columnIndex : columnIndex;
                         const state = selectedWordPositionsMap.has(`${rowIndex}-${columnIndex}`) ? 1 : 0;
                         return (
                             <div key={`square-${rowIndex}-${columnIndex}`}>
-                                <GridSquare clickHandler={clickHandler} letter={letter} row={rowIndex} column={columnIndex} state={state} />
+                                <GridSquare clickHandler={gridSquareClickHandler} letter={letter} row={rowIndex} column={columnIndex} state={state} />
                             </div>)
                     })
                 })

@@ -11,18 +11,23 @@ export const GridSquare = (props: GridSquareProps) => {
 
     const { letter, row, column, state, clickHandler } = props;
 
-    const triggerEvent = (el: Node, eventType: string, detail: any) =>
-        el.dispatchEvent(new CustomEvent(eventType, { detail }));
-
     const handleClick = () => {
         clickHandler && clickHandler(row, column);
-        //triggerEvent(document, 'grid-click', { row, column });
+    }
+
+    const classes = () => {
+        if (state === 0) {
+            return "bg-gray-100 hover:bg-gray-300";
+        }
+        if (state === 1) {
+            return "bg-rose-100 hover:bg-rose-300";
+        }
     }
 
     return (
         <div
-            className={`square-${row}-${column} flex align-middle justify-center w-full h-full`}
-            style={{ width: "30px", height: "30px", color: state === 1 ? "red" : "black" }}
+            className={`square-${row}-${column} rounded-sm flex align-middle justify-center w-full h-full ${classes()}`}
+            style={{ width: "30px", height: "30px" }}
             onClick={handleClick}
         >
             <span>{letter}</span>

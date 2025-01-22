@@ -1,10 +1,7 @@
 "use client";
 import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
-import { generateWordGrid, getWordFromPoints } from '@/utils/grid_generation/shared';
-import { useEffect, useRef, useState } from 'react';
-import Board from '@/components/grid/board';
-import { useMap } from '@/hooks/useMap';
+import WordSearch from '@/components/wordSearch/WordSearch';
 
 const wordBank = ["test", "hershey", "string", "murphy", "gorillas", "metallica"];
 
@@ -13,15 +10,7 @@ export default function Home() {
 
     //TODO: Make this page a server component that receives a list of words, likely from local storage
 
-    const [searchGrid, setSearchGrid] = useState<string[][] | null>(null);
 
-
-    useEffect(() => {
-        const generatedWordSearchGrid = generateWordGrid(wordBank, 10, 10);
-        generatedWordSearchGrid.then((value) => {
-            setSearchGrid(value);
-        }).catch((error) => { console.log(error); });
-    }, []);
 
     return (
         <div className={styles.container}>
@@ -35,11 +24,10 @@ export default function Home() {
                     Word Search
                 </h1>
 
-                {searchGrid ?
-                    <div>
-                        <Board size={10} wordSearchGrid={searchGrid} wordBank={wordBank} />
-                    </div> : null
-                }
+
+                <div>
+                    <WordSearch size={10} wordList={wordBank} />
+                </div>
 
 
 
