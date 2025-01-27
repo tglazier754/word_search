@@ -20,7 +20,7 @@ export const WordSearch = (props: BoardProps) => {
 
 
     return (
-        <div className={`flex`}>
+        <div className={`flex flex-row gap-8`}>
             {searchGrid &&
                 <Board
                     size={size}

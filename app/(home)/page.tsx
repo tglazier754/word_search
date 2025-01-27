@@ -3,48 +3,38 @@ import Head from 'next/head';
 import styles from "@/styles/Home.module.css";
 import WordSearch from '@/components/wordSearch/WordSearch';
 
-const wordBank = ["test", "hershey", "string", "murphy", "gorillas", "metallica"];
+const wordBank = ["javascript", "class", "object", "function", "string", "reference", "props", "params"];
 
 
 export default function Home() {
 
-    //TODO: Make this page a server component that receives a list of words, likely from local storage
+  //TODO: Make this page a server component that receives a list of words, likely from local storage
+
+  return (
+    <div className={styles.container}>
+      <Head>
+        <title>Word Search</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main>
+        <h1 className={styles.title}>
+          Word Search
+        </h1>
+
+
+        <div>
+          <WordSearch size={10} wordList={wordBank} />
+        </div>
 
 
 
-    return (
-        <div className={styles.container}>
-            <Head>
-                <title>Word Search</title>
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
+      </main>
 
-            <main>
-                <h1 className={styles.title}>
-                    Word Search
-                </h1>
+      <footer>
+      </footer>
 
-
-                <div>
-                    <WordSearch size={10} wordList={wordBank} />
-                </div>
-
-
-
-            </main>
-
-            <footer>
-                <a
-                    href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Powered by{' '}
-                    <img src="/vercel.svg" alt="Vercel" className={styles.logo} />
-                </a>
-            </footer>
-
-            <style jsx>{`
+      <style jsx>{`
         main {
           padding: 5rem 0;
           flex: 1;
@@ -87,6 +77,6 @@ export default function Home() {
             monospace;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

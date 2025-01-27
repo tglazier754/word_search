@@ -11,9 +11,13 @@ export const WordList = (props: WordListProps) => {
         <div>
             <ul>
                 {wordBank &&
-                    wordBank.entries().map((word, index) => {
-                        console.log(word[1])
-                        return <li style={{ textDecoration: word[1] ? "line-through" : "unset" }} key={`word-list-${index}`}>{word[0]}</li>
+                    Array.from(wordBank.entries()).map((word, index) => {
+                        return <li style={{
+                            textDecoration: word[1] ? "line-through" : "unset",
+                            color: word[1] ? "red" : "unset"
+                        }} key={`word-list-${index}`}>
+                            <span className="text-lg font-bold">{word[0]}</span>
+                        </li>
                     })}
             </ul>
         </div>
